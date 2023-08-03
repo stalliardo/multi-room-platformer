@@ -22,8 +22,6 @@ const Canvas = () => {
     ctx.fillRect(100, 100, 100, 100);
 
     const player = new Player(ctx, cr);
-    console.log("player = ", player.height);
-
 
     function animate() {
       requestAnimationFrame(animate);
@@ -36,7 +34,6 @@ const Canvas = () => {
 
       player.draw();
       player.update()
-
       // ctx?.clearRect(0, 0, canvasRef?.width ?? 0, canvasRef?.height ?? 0);
     }
 
