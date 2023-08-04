@@ -1,13 +1,20 @@
 import CollisionBlock from "./CollisionBlock";
+import Sprite from "./Sprite";
 
 interface PlayerArgs {
-    collisionBlocks: CollisionBlock[]
+    collisionBlocks: CollisionBlock[];
+    position: {
+        x: number,
+        y: number
+    };
+    imageSrc: string;
+    canvas: HTMLCanvasElement;
+    frameRate: number;
 }
 
-export default class Player {
+export default class Player extends Sprite {
     position = { x: 200, y: 200 };
-    width: number = 25;
-    height: number = 25;
+    
     velocity = {
         x: 0,
         y: 0
@@ -18,7 +25,8 @@ export default class Player {
     gravity: number = 1;
     collisionBlocks;
 
-    constructor(public canvas: HTMLCanvasElement, { collisionBlocks }: PlayerArgs) {
+    constructor({ collisionBlocks, position, imageSrc, canvas, frameRate }: PlayerArgs) {
+        super({position, imageSrc, frameRate})
         this.collisionBlocks = collisionBlocks;
     }
 
@@ -69,12 +77,6 @@ export default class Player {
     applyGravity() {
         this.velocity.y += this.gravity;
         this.position.y += this.velocity.y;
-    }
-
-
-    draw(ctx: CanvasRenderingContext2D) {
-        ctx.fillStyle = "red";
-        ctx.fillRect(this.position.x, this.position.y, this.width, this.height)
     }
 
     update() {
