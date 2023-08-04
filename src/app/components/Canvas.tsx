@@ -1,4 +1,5 @@
 import Player from '@/classes/Player';
+import Sprite from '@/classes/Sprite';
 import React, { useRef, useEffect, useState } from 'react';
 
 const Canvas = () => {
@@ -33,6 +34,7 @@ const Canvas = () => {
     ctx.fillRect(100, 100, 100, 100);
 
     const player = new Player(ctx, cr);
+    const backgroundLevel1 = new Sprite({position: {x: 0, y: 0}, imageSrc: "backgroundLevel1.png"});
 
     function animate() {
       requestAnimationFrame(animate);
@@ -40,8 +42,7 @@ const Canvas = () => {
       const currentCtx = canvasRef.current?.getContext("2d");
       if (!currentCtx) return;
 
-      currentCtx.fillStyle = 'white';
-      ctx?.fillRect(0, 0, cr.width, cr.height);
+      backgroundLevel1.draw(currentCtx)
 
       player.velocity.x = 0;
 
