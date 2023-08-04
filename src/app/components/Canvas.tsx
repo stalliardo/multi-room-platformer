@@ -1,7 +1,7 @@
 import Player from '@/classes/Player';
 import Sprite from '@/classes/Sprite';
 import React, { useRef, useEffect, useState } from 'react';
-import { parsedCollisions } from '../../../GameUtils/mapData/collision';
+import { getCollisionBlocksArray } from '../../../GameUtils/mapData/collision';
 
 const Canvas = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -37,13 +37,19 @@ const Canvas = () => {
     const player = new Player(ctx, cr);
     const backgroundLevel1 = new Sprite({position: {x: 0, y: 0}, imageSrc: "backgroundLevel1.png"});
 
+    // set the collsionBlocks by calling the function
+    const collisionBlocks = getCollisionBlocksArray("level1"); 
+
     function animate() {
       requestAnimationFrame(animate);
 
       const currentCtx = canvasRef.current?.getContext("2d");
       if (!currentCtx) return;
 
-      backgroundLevel1.draw(currentCtx)
+      backgroundLevel1.draw(currentCtx);
+      collisionBlocks.forEach((collisionBlock) => {
+        collisionBlock.draw(currentCtx);
+      });
 
       player.velocity.x = 0;
 
