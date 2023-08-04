@@ -1,6 +1,7 @@
 import Player from '@/classes/Player';
 import Sprite from '@/classes/Sprite';
 import React, { useRef, useEffect, useState } from 'react';
+import { parsedCollisions } from '../../../GameUtils/mapData/collision';
 
 const Canvas = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
