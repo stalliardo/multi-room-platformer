@@ -16,7 +16,7 @@ export default class CollisionBlock {
     }
 
     draw(ctx: CanvasRenderingContext2D){
-        ctx.fillStyle = "red";
+        ctx.fillStyle = "rgba(255, 0, 0, 0.6)";
         ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
     }
 }

@@ -34,11 +34,11 @@ const Canvas = () => {
     ctx.fillStyle = 'red';
     ctx.fillRect(100, 100, 100, 100);
 
-    const player = new Player(ctx, cr);
+    const collisionBlocks = getCollisionBlocksArray("level1"); 
+    const player = new Player(cr, {collisionBlocks});
     const backgroundLevel1 = new Sprite({position: {x: 0, y: 0}, imageSrc: "backgroundLevel1.png"});
 
     // set the collsionBlocks by calling the function
-    const collisionBlocks = getCollisionBlocksArray("level1"); 
 
     function animate() {
       requestAnimationFrame(animate);
@@ -56,7 +56,7 @@ const Canvas = () => {
       if (keys.d.pressed) player.velocity.x = 5; 
       else if (keys.a.pressed) player.velocity.x = -5;
       
-      player.draw();
+      player.draw(currentCtx);
       player.update()
       // ctx?.clearRect(0, 0, canvasRef?.width ?? 0, canvasRef?.height ?? 0);
     }
