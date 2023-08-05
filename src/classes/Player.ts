@@ -1,21 +1,6 @@
 import CollisionBlock from "./CollisionBlock";
 import Sprite from "./Sprite";
 
-type Animations = {
-    [index: string]: AnimationItem;
-    idleRight: AnimationItem;
-    idleLeft: AnimationItem;
-    runRight: AnimationItem;
-    runLeft: AnimationItem;
-    enterDoor: AnimationItem;
-}
-type AnimationItem = {
-    frameRate: number;
-    frameBuffer: number;
-    loop: boolean;
-    imageSrc: string;
-    image?: any
-}
 
 interface PlayerArgs {
     collisionBlocks: CollisionBlock[];
@@ -27,7 +12,7 @@ interface PlayerArgs {
     canvas: HTMLCanvasElement;
     frameRate: number;
     ctx: CanvasRenderingContext2D;
-    animations: Animations
+    animations: Animations;
     loop?: boolean;
 }
 
@@ -162,5 +147,6 @@ export default class Player extends Sprite {
         this.frameRate = this.animations[name].frameRate;
         this.frameBuffer = this.animations[name].frameBuffer;
         this.loop = this.animations[name].loop;
+        this.currentAnimation = this.animations[name];
     }
 }

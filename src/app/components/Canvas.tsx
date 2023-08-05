@@ -2,6 +2,7 @@ import Player from '@/classes/Player';
 import Sprite from '@/classes/Sprite';
 import React, { useRef, useEffect, useState } from 'react';
 import { getCollisionBlocksArray } from '../../../GameUtils/mapData/collision';
+import { gsap } from 'gsap';
 
 const Canvas = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -72,11 +73,16 @@ const Canvas = () => {
           frameRate: 8,
           frameBuffer: 4,
           loop: false,
-          imageSrc: "king/enterDoor.png"
+          imageSrc: "king/enterDoor.png",
+          onComplete: () => {
+            gsap.to(overlay, {
+              opacity: 1
+            })
+          },
+          isActive: false
         }
       }
     });
-
 
     const doors = [
       new Sprite({
@@ -89,11 +95,11 @@ const Canvas = () => {
       })
     ]
 
-
-
     const backgroundLevel1 = new Sprite({ position: { x: 0, y: 0 }, imageSrc: "backgroundLevel1.png" });
 
-    // set the collsionBlocks by calling the function
+    const overlay = {
+      opacity: 0
+    }
 
     function animate() {
       requestAnimationFrame(animate);
@@ -109,12 +115,16 @@ const Canvas = () => {
       doors.forEach((door) => {
         door.draw(currentCtx);
       });
-
       
       player.handleInput(keys);
       player.draw(currentCtx);
-      player.update()
-      // ctx?.clearRect(0, 0, canvasRef?.width ?? 0, canvasRef?.height ?? 0);
+      player.update();
+
+      currentCtx.save();
+      currentCtx.globalAlpha = overlay.opacity;
+      currentCtx.fillStyle = "black";
+      currentCtx.fillRect(0,0, cr.width, cr.height);
+      currentCtx.restore();
     }
 
     animate();
