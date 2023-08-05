@@ -28,7 +28,7 @@ const Canvas = () => {
     if (!ctx) return;
 
     const cr = canvasRef.current;
-
+    
     // set the canvas width
     cr.width = 1024;
     cr.height = 576;
@@ -172,9 +172,11 @@ const Canvas = () => {
       if (!currentCtx) return;
 
       background.draw(currentCtx);
-      collisionBlocks.forEach((collisionBlock) => {
-        collisionBlock.draw(currentCtx);
-      });
+
+      // TODO for debugging only
+      // collisionBlocks.forEach((collisionBlock) => {
+      //   collisionBlock.draw(currentCtx);
+      // });
 
       doors.forEach((door) => {
         door.draw(currentCtx);

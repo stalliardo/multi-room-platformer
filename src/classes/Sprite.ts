@@ -25,7 +25,7 @@ export default class Sprite {
     animations;
     loop;
     autoplay;
-    currentAnimation?: AnimationItem ;
+    currentAnimation?: AnimationItem;
 
     constructor({ position, imageSrc, frameRate = 1, frameBuffer = 4, animations, loop = true, autoplay = true }: SpriteArgs) {
         this.position = position;
@@ -45,8 +45,8 @@ export default class Sprite {
         this.autoplay = autoplay;
         this.currentAnimation;
 
-        if(this.animations){
-            for(let key in this.animations){
+        if (this.animations) {
+            for (let key in this.animations) {
                 const image = new Image();
                 image.src = this.animations[key].imageSrc;
                 this.animations[key].image = image;
@@ -79,29 +79,28 @@ export default class Sprite {
         this.updateFrames();
     }
 
-    play(){
+    play() {
         this.autoplay = true;
     }
 
-    updateFrames(){
-        if(!this.autoplay) return;
+    updateFrames() {
+        if (!this.autoplay) return;
 
         this.elapsedFrames++;
 
-        if(this.elapsedFrames % this.frameBuffer === 0){
-            if(this.currentFrame < this.frameRate - 1){
+        if (this.elapsedFrames % this.frameBuffer === 0) {
+            if (this.currentFrame < this.frameRate - 1) {
                 this.currentFrame++;
             } else if (this.loop) {
                 this.currentFrame = 0;
             }
         }
 
-        if(this.currentAnimation?.onComplete){
-            if(this.currentFrame === this.frameRate -1 && !this.currentAnimation.isActive){
+        if (this.currentAnimation?.onComplete) {
+            if (this.currentFrame === this.frameRate - 1 && !this.currentAnimation.isActive) {
                 this.currentAnimation.onComplete();
                 this.currentAnimation.isActive = true;
             }
         }
-
     }
 }

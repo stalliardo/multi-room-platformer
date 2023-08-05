@@ -17,11 +17,10 @@ type Animations = {
     enterDoor: AnimationItem;
 }
 
-
 type Init = {
     init: () => void;
-  }
+}
 
-  type Levels = {
+type Levels = {
     [inedx: number]: Init;
-  }
+}

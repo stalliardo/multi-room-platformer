@@ -54,7 +54,7 @@ export const getCollisionBlocksArray = (level: Levels) => {
 
     let parsedCollisions;
 
-    switch(level){
+    switch (level) {
         case "level1": {
             parsedCollisions = parse2D(levelOneCollisionData);
             break;
