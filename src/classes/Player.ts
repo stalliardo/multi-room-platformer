@@ -135,9 +135,7 @@ export default class Player extends Sprite {
         this.switchSprite("idleLeft");
       } else {
         this.switchSprite("idleRight");
-
       }
-
     }
 
     switchSprite(name: string){

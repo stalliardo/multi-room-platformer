@@ -16,3 +16,12 @@ type Animations = {
     runLeft: AnimationItem;
     enterDoor: AnimationItem;
 }
+
+
+type Init = {
+    init: () => void;
+  }
+
+  type Levels = {
+    [inedx: number]: Init;
+  }
