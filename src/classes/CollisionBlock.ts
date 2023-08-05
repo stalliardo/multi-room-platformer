@@ -1,4 +1,3 @@
-
 interface CollisionArgs {
     position: {
         x: number;

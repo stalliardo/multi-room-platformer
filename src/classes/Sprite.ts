@@ -1,18 +1,3 @@
-type Animations = {
-    [index: string]: AnimationItem;
-    idleRight: AnimationItem;
-    idleLeft: AnimationItem;
-    runRight: AnimationItem;
-    runLeft: AnimationItem;
-}
-type AnimationItem = {
-    frameRate: number;
-    frameBuffer: number;
-    loop: boolean;
-    imageSrc: string;
-    image?: any
-}
-
 interface SpriteArgs {
     position: {
         x: number;
@@ -20,7 +5,10 @@ interface SpriteArgs {
     },
     imageSrc: string;
     frameRate?: number;
-    animations?: Animations 
+    frameBuffer?: number;
+    animations?: Animations
+    loop?: boolean;
+    autoplay?: boolean;
 }
 
 export default class Sprite {
@@ -35,8 +23,11 @@ export default class Sprite {
     elapsedFrames;
     frameBuffer;
     animations;
+    loop;
+    autoplay;
+    currentAnimation?: AnimationItem;
 
-    constructor({ position, imageSrc, frameRate = 1, animations }: SpriteArgs) {
+    constructor({ position, imageSrc, frameRate = 1, frameBuffer = 4, animations, loop = true, autoplay = true }: SpriteArgs) {
         this.position = position;
         this.imageSrc = imageSrc;
         this.image.src = this.imageSrc;
@@ -48,11 +39,14 @@ export default class Sprite {
         }
         this.currentFrame = 0;
         this.elapsedFrames = 0;
-        this.frameBuffer = 4;
+        this.frameBuffer = frameBuffer;
         this.animations = animations;
+        this.loop = loop;
+        this.autoplay = autoplay;
+        this.currentAnimation;
 
-        if(this.animations){
-            for(let key in this.animations){
+        if (this.animations) {
+            for (let key in this.animations) {
                 const image = new Image();
                 image.src = this.animations[key].imageSrc;
                 this.animations[key].image = image;
@@ -85,15 +79,28 @@ export default class Sprite {
         this.updateFrames();
     }
 
-    updateFrames(){
+    play() {
+        this.autoplay = true;
+    }
+
+    updateFrames() {
+        if (!this.autoplay) return;
+
         this.elapsedFrames++;
-        if(this.elapsedFrames % this.frameBuffer === 0){
-            if(this.currentFrame < this.frameRate - 1){
+
+        if (this.elapsedFrames % this.frameBuffer === 0) {
+            if (this.currentFrame < this.frameRate - 1) {
                 this.currentFrame++;
-            } else {
+            } else if (this.loop) {
                 this.currentFrame = 0;
             }
         }
 
+        if (this.currentAnimation?.onComplete) {
+            if (this.currentFrame === this.frameRate - 1 && !this.currentAnimation.isActive) {
+                this.currentAnimation.onComplete();
+                this.currentAnimation.isActive = true;
+            }
+        }
     }
 }

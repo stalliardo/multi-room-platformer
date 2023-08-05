@@ -1,21 +1,6 @@
 import CollisionBlock from "./CollisionBlock";
 import Sprite from "./Sprite";
 
-type Animations = {
-    [index: string]: AnimationItem;
-    idleRight: AnimationItem;
-    idleLeft: AnimationItem;
-    runRight: AnimationItem;
-    runLeft: AnimationItem;
-}
-type AnimationItem = {
-    frameRate: number;
-    frameBuffer: number;
-    loop: boolean;
-    imageSrc: string;
-    image?: any
-}
-
 interface PlayerArgs {
     collisionBlocks: CollisionBlock[];
     position: {
@@ -26,12 +11,13 @@ interface PlayerArgs {
     canvas: HTMLCanvasElement;
     frameRate: number;
     ctx: CanvasRenderingContext2D;
-    animations: Animations
+    animations: Animations;
+    loop?: boolean;
 }
 
 export default class Player extends Sprite {
     position = { x: 200, y: 200 };
-    hitBox = {position: {x: 0, y: 0}, width: 0, height: 0};
+    hitBox = { position: { x: 0, y: 0 }, width: 0, height: 0 };
     velocity = {
         x: 0,
         y: 0
@@ -44,12 +30,14 @@ export default class Player extends Sprite {
     ctx;
     animations;
     lastDirection: string = "right";
+    preventInput: boolean = false;
 
-    constructor({ collisionBlocks, position, imageSrc, canvas, frameRate, ctx, animations }: PlayerArgs) {
-        super({position, imageSrc, frameRate, animations})
+    constructor({ collisionBlocks, position, imageSrc, canvas, frameRate, ctx, animations, loop = true }: PlayerArgs) {
+        super({ position, imageSrc, frameRate, animations, loop })
         this.collisionBlocks = collisionBlocks;
         this.ctx = ctx;
         this.animations = animations;
+        this.loop = loop;
     }
 
     checkForHorizontalCollisions() {
@@ -79,10 +67,10 @@ export default class Player extends Sprite {
         for (let i = 0; i < this.collisionBlocks.length; i++) {
             const collisionBlock = this.collisionBlocks[i];
             if (
-                this.hitBox.position.x <= collisionBlock.position.x + collisionBlock.width && // left side of player, right side of collision block
-                this.hitBox.position.x + this.hitBox.width >= collisionBlock.position.x &&           // right side of player, left side of collision block
-                this.hitBox.position.y + this.hitBox.height >= collisionBlock.position.y &&          // bottom of player, top of collision block
-                this.hitBox.position.y <= collisionBlock.position.y + collisionBlock.height   // top of player, bottom of collision block
+                this.hitBox.position.x <= collisionBlock.position.x + collisionBlock.width && 
+                this.hitBox.position.x + this.hitBox.width >= collisionBlock.position.x &&
+                this.hitBox.position.y + this.hitBox.height >= collisionBlock.position.y &&
+                this.hitBox.position.y <= collisionBlock.position.y + collisionBlock.height
             ) {
                 if (this.velocity.y < 0) { // collision on y axis, top of player
                     this.velocity.y = 0;
@@ -105,7 +93,7 @@ export default class Player extends Sprite {
         this.position.y += this.velocity.y;
     }
 
-    updateHitBox(){
+    updateHitBox() {
         this.hitBox = {
             position: {
                 x: this.position.x + 58,
@@ -124,16 +112,36 @@ export default class Player extends Sprite {
         this.applyGravity();
         this.updateHitBox();
 
-        // this.ctx.fillStyle = "rgba(0,0,255, 0.5)"
-        // this.ctx.fillRect(this.hitBox.position.x, this.hitBox.position.y, this.hitBox.width, this.hitBox.height);
         this.checkForVerticalCollisions();
     }
 
-    switchSprite(name: string){
-        if(this.image === this.animations[name].image) return;
+    handleInput(keys: any) {
+        if (this.preventInput) return;
+        this.velocity.x = 0;
+
+        if (keys.d.pressed) {
+            this.switchSprite("runRight");
+            this.velocity.x = 5;
+            this.lastDirection = "right";
+        }
+        else if (keys.a.pressed) {
+            this.switchSprite("runLeft");
+            this.velocity.x = -5;
+            this.lastDirection = "left";
+        } else if (this.lastDirection === "left") {
+            this.switchSprite("idleLeft");
+        } else {
+            this.switchSprite("idleRight");
+        }
+    }
+
+    switchSprite(name: string) {
+        if (this.image === this.animations[name].image) return;
         this.currentFrame = 0;
         this.image = this.animations[name].image;
         this.frameRate = this.animations[name].frameRate;
         this.frameBuffer = this.animations[name].frameBuffer;
+        this.loop = this.animations[name].loop;
+        this.currentAnimation = this.animations[name];
     }
 }
