@@ -31,6 +31,8 @@ export default class Player extends Sprite {
     animations;
     lastDirection: string = "right";
     preventInput: boolean = false;
+    camerabox: any;
+    canvas: HTMLCanvasElement;
 
     constructor({ collisionBlocks, position, imageSrc, canvas, frameRate, ctx, animations, loop = true }: PlayerArgs) {
         super({ position, imageSrc, frameRate, animations, loop })
@@ -38,6 +40,17 @@ export default class Player extends Sprite {
         this.ctx = ctx;
         this.animations = animations;
         this.loop = loop;
+        this.canvas = canvas;
+
+        this.camerabox = {
+            position: {
+                x: this.position.x,
+                y: this.position.y,
+            },
+            width: 200,
+            height: 80
+
+        }
     }
 
     checkForHorizontalCollisions() {
@@ -67,7 +80,7 @@ export default class Player extends Sprite {
         for (let i = 0; i < this.collisionBlocks.length; i++) {
             const collisionBlock = this.collisionBlocks[i];
             if (
-                this.hitBox.position.x <= collisionBlock.position.x + collisionBlock.width && 
+                this.hitBox.position.x <= collisionBlock.position.x + collisionBlock.width &&
                 this.hitBox.position.x + this.hitBox.width >= collisionBlock.position.x &&
                 this.hitBox.position.y + this.hitBox.height >= collisionBlock.position.y &&
                 this.hitBox.position.y <= collisionBlock.position.y + collisionBlock.height
@@ -106,6 +119,7 @@ export default class Player extends Sprite {
 
     update() {
         this.position.x += this.velocity.x;
+        this.velocity.x = 0;
 
         this.updateHitBox();
         this.checkForHorizontalCollisions();
@@ -113,16 +127,21 @@ export default class Player extends Sprite {
         this.updateHitBox();
 
         this.checkForVerticalCollisions();
+
+        this.updateCamerabox()
+
+        this.ctx.fillStyle = "rgba(0,0,255, 0.5)"
+        this.ctx.fillRect(this.camerabox.position.x, this.camerabox.position.y, this.camerabox.width, this.camerabox.height)
     }
 
-    handleInput(keys: any) {
+    handleInput(keys: any, camera: any) {
         if (this.preventInput) return;
-        this.velocity.x = 0;
 
         if (keys.d.pressed) {
             this.switchSprite("runRight");
             this.velocity.x = 5;
             this.lastDirection = "right";
+            this.shouldPanCameraToTheLeft(camera)
         }
         else if (keys.a.pressed) {
             this.switchSprite("runLeft");
@@ -133,6 +152,30 @@ export default class Player extends Sprite {
         } else {
             this.switchSprite("idleRight");
         }
+    }
+
+    updateCamerabox() {
+        this.camerabox = {
+            position: {
+                x: this.position.x - 20,
+                y: this.position.y,
+            },
+            width: 200,
+            height: 80
+        }
+    }
+
+    shouldPanCameraToTheLeft(camera: any) {
+        const cameraboxRightSide = this.camerabox.position.x + this.camerabox.width;
+
+        if(cameraboxRightSide >= 3072){
+            return;
+        }
+
+        if (cameraboxRightSide >= this.canvas.width + Math.abs(camera.position.x)) {
+            camera.position.x -= this.velocity.x
+        }
+
     }
 
     switchSprite(name: string) {

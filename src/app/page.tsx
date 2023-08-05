@@ -1,5 +1,6 @@
 "use client"
 import Canvas from "./components/Canvas";
+import ScrollableCanvas from "./components/ScrollableCanvas";
 
 export default function Home() {
 
@@ -10,7 +11,8 @@ export default function Home() {
       display: "flex",
       margin: "60px auto"
     }}>
-      <Canvas />
+      {/* <Canvas /> */}
+      <ScrollableCanvas />
     </div>
   )
 }

@@ -5,7 +5,7 @@ import { getCollisionBlocksArray } from '../../../GameUtils/mapData/collision';
 import { gsap } from 'gsap';
 import CollisionBlock from '@/classes/CollisionBlock';
 
-const Canvas = () => {
+const ScrollableCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const keys = {
     w: {
@@ -95,7 +95,7 @@ const Canvas = () => {
       }
     });
 
-    let level = 1;
+    let level = 5;
     let levels: Levels = {
       1: {
         init: () => {
@@ -179,11 +179,39 @@ const Canvas = () => {
             })
           ]
         }
+      },
+      5: {
+        init: () => {
+          collisionBlocks = getCollisionBlocksArray("level5");
+          background = new Sprite({ position: { x: 0, y: 0 }, imageSrc: "longMap.png" });
+          player.collisionBlocks = collisionBlocks;
+          if(player.currentAnimation?.isActive) player.currentAnimation.isActive = false;
+          player.position.x = 150;
+          player.position.y = 350;
+
+          doors = [
+            new Sprite({
+              position: { x: 0, y: 0 },
+              imageSrc: "doorOpen.png",
+              frameRate: 5,
+              frameBuffer: 6,
+              loop: false,
+              autoplay: false
+            })
+          ]
+        }
       }
     }
 
     const overlay = {
       opacity: 0
+    }
+
+    const camera = {
+        position: {
+            x: 0,
+            y: 0
+        }
     }
 
     function animate() {
@@ -192,26 +220,28 @@ const Canvas = () => {
       const currentCtx = canvasRef.current?.getContext("2d");
       if (!currentCtx) return;
 
-      background.draw(currentCtx);
+      currentCtx.save();
 
-      // TODO for debugging only
-      // collisionBlocks.forEach((collisionBlock) => {
-      //   collisionBlock.draw(currentCtx);
-      // });
+      currentCtx.translate(camera.position.x, 0);
+
+      background.draw(currentCtx);
 
       doors.forEach((door) => {
         door.draw(currentCtx);
       });
 
-      player.handleInput(keys);
+      player.handleInput(keys, camera);
       player.draw(currentCtx);
       player.update();
+
+      currentCtx.restore();
 
       currentCtx.save();
       currentCtx.globalAlpha = overlay.opacity;
       currentCtx.fillStyle = "black";
       currentCtx.fillRect(0, 0, cr.width, cr.height);
       currentCtx.restore();
+
     }
 
     levels[level].init();
@@ -269,4 +299,4 @@ const Canvas = () => {
   </div>
 };
 
-export default Canvas;
+export default ScrollableCanvas;
