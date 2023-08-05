@@ -1,7 +1,37 @@
-export default class Player {
-    position = { x: 100, y: 100 };
-    width: number = 100;
-    height: number = 100;
+import CollisionBlock from "./CollisionBlock";
+import Sprite from "./Sprite";
+
+type Animations = {
+    [index: string]: AnimationItem;
+    idleRight: AnimationItem;
+    idleLeft: AnimationItem;
+    runRight: AnimationItem;
+    runLeft: AnimationItem;
+}
+type AnimationItem = {
+    frameRate: number;
+    frameBuffer: number;
+    loop: boolean;
+    imageSrc: string;
+    image?: any
+}
+
+interface PlayerArgs {
+    collisionBlocks: CollisionBlock[];
+    position: {
+        x: number,
+        y: number
+    };
+    imageSrc: string;
+    canvas: HTMLCanvasElement;
+    frameRate: number;
+    ctx: CanvasRenderingContext2D;
+    animations: Animations
+}
+
+export default class Player extends Sprite {
+    position = { x: 200, y: 200 };
+    hitBox = {position: {x: 0, y: 0}, width: 0, height: 0};
     velocity = {
         x: 0,
         y: 0
@@ -10,24 +40,100 @@ export default class Player {
         bottom: this.position.y + this.height
     }
     gravity: number = 1;
+    collisionBlocks;
+    ctx;
+    animations;
+    lastDirection: string = "right";
 
-    constructor(public c: CanvasRenderingContext2D, public canvas: HTMLCanvasElement) { }
+    constructor({ collisionBlocks, position, imageSrc, canvas, frameRate, ctx, animations }: PlayerArgs) {
+        super({position, imageSrc, frameRate, animations})
+        this.collisionBlocks = collisionBlocks;
+        this.ctx = ctx;
+        this.animations = animations;
+    }
 
-    draw() {
-        this.c.fillStyle = "red";
-        this.c.fillRect(this.position.x, this.position.y, this.width, this.height)
+    checkForHorizontalCollisions() {
+        for (let i = 0; i < this.collisionBlocks.length; i++) {
+            const collisionBlock = this.collisionBlocks[i];
+            if (
+                this.hitBox.position.x <= collisionBlock.position.x + collisionBlock.width && // left side of player, right side of collision block
+                this.hitBox.position.x + this.hitBox.width >= collisionBlock.position.x &&           // right side of player, left side of collision block
+                this.hitBox.position.y + this.hitBox.height >= collisionBlock.position.y &&          // bottom of player, top of collision block
+                this.hitBox.position.y <= collisionBlock.position.y + collisionBlock.height   // top of player, bottom of collision block
+            ) {
+                if (this.velocity.x < -0) { // collision on x axis going left
+                    const offset = this.hitBox.position.x - this.position.x;
+                    this.position.x = collisionBlock.position.x + collisionBlock.width - offset + 0.01; // move the player to the right side of the block
+                    break;
+                }
+                if (this.velocity.x > 0) {
+                    const offset = this.hitBox.position.x - this.position.x + this.hitBox.width
+                    this.position.x = collisionBlock.position.x - offset - 0.01; // move the player to the left side of the block
+                    break;
+                }
+            }
+        }
+    }
+
+    checkForVerticalCollisions() {
+        for (let i = 0; i < this.collisionBlocks.length; i++) {
+            const collisionBlock = this.collisionBlocks[i];
+            if (
+                this.hitBox.position.x <= collisionBlock.position.x + collisionBlock.width && // left side of player, right side of collision block
+                this.hitBox.position.x + this.hitBox.width >= collisionBlock.position.x &&           // right side of player, left side of collision block
+                this.hitBox.position.y + this.hitBox.height >= collisionBlock.position.y &&          // bottom of player, top of collision block
+                this.hitBox.position.y <= collisionBlock.position.y + collisionBlock.height   // top of player, bottom of collision block
+            ) {
+                if (this.velocity.y < 0) { // collision on y axis, top of player
+                    this.velocity.y = 0;
+                    const offset = this.hitBox.position.y - this.position.y
+                    this.position.y = collisionBlock.position.y + collisionBlock.height - offset + 0.01; // move the player to the underside of the block
+                    break;
+                }
+                if (this.velocity.y > 0) {
+                    this.velocity.y = 0;
+                    const offset = this.hitBox.position.y - this.position.y + this.hitBox.height;
+                    this.position.y = collisionBlock.position.y - offset - 0.01; // move the player to the left side of the block
+                    break;
+                }
+            }
+        }
+    }
+
+    applyGravity() {
+        this.velocity.y += this.gravity;
+        this.position.y += this.velocity.y;
+    }
+
+    updateHitBox(){
+        this.hitBox = {
+            position: {
+                x: this.position.x + 58,
+                y: this.position.y + 34
+            },
+            width: 50,
+            height: 54
+        }
     }
 
     update() {
         this.position.x += this.velocity.x;
-        this.position.y += this.velocity.y;
-        this.sides.bottom = this.position.y + this.height;
 
-        // Above bottom of canvas
-        if (this.sides.bottom + this.velocity.y < this.canvas.height) {
-            this.velocity.y += this.gravity;
-        } else {
-            this.velocity.y = 0;
-        }
+        this.updateHitBox();
+        this.checkForHorizontalCollisions();
+        this.applyGravity();
+        this.updateHitBox();
+
+        // this.ctx.fillStyle = "rgba(0,0,255, 0.5)"
+        // this.ctx.fillRect(this.hitBox.position.x, this.hitBox.position.y, this.hitBox.width, this.hitBox.height);
+        this.checkForVerticalCollisions();
+    }
+
+    switchSprite(name: string){
+        if(this.image === this.animations[name].image) return;
+        this.currentFrame = 0;
+        this.image = this.animations[name].image;
+        this.frameRate = this.animations[name].frameRate;
+        this.frameBuffer = this.animations[name].frameBuffer;
     }
 }

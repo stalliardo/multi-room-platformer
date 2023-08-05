@@ -1,5 +1,7 @@
 import Player from '@/classes/Player';
+import Sprite from '@/classes/Sprite';
 import React, { useRef, useEffect, useState } from 'react';
+import { getCollisionBlocksArray } from '../../../GameUtils/mapData/collision';
 
 const Canvas = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -32,7 +34,45 @@ const Canvas = () => {
     ctx.fillStyle = 'red';
     ctx.fillRect(100, 100, 100, 100);
 
-    const player = new Player(ctx, cr);
+    const collisionBlocks = getCollisionBlocksArray("level1"); 
+    
+    const player = new Player({
+      collisionBlocks, 
+      position: {x: 200, y: 200}, 
+      imageSrc: "king/idle.png", 
+      canvas: cr, 
+      frameRate: 11, 
+      ctx,
+      animations: {
+        idleRight: {
+          frameRate: 11,
+          frameBuffer: 2,
+          loop: true,
+          imageSrc: "king/idle.png",
+      },
+      idleLeft: {
+          frameRate: 11,
+          frameBuffer: 2,
+          loop: true,
+          imageSrc: "king/idleLeft.png"
+      },
+      runRight: {
+          frameRate: 8,
+          frameBuffer: 4,
+          loop: true,
+          imageSrc: "king/runRight.png"
+      },
+      runLeft: {
+          frameRate: 8,
+          frameBuffer: 4,
+          loop: true,
+          imageSrc: "king/runLeft.png"
+      }
+      }
+    });
+    const backgroundLevel1 = new Sprite({position: {x: 0, y: 0}, imageSrc: "backgroundLevel1.png"});
+
+    // set the collsionBlocks by calling the function
 
     function animate() {
       requestAnimationFrame(animate);
@@ -40,15 +80,30 @@ const Canvas = () => {
       const currentCtx = canvasRef.current?.getContext("2d");
       if (!currentCtx) return;
 
-      currentCtx.fillStyle = 'white';
-      ctx?.fillRect(0, 0, cr.width, cr.height);
+      backgroundLevel1.draw(currentCtx);
+      collisionBlocks.forEach((collisionBlock) => {
+        collisionBlock.draw(currentCtx);
+      });
 
       player.velocity.x = 0;
 
-      if (keys.d.pressed) player.velocity.x = 5; 
-      else if (keys.a.pressed) player.velocity.x = -5;
+      if (keys.d.pressed) {
+        player.switchSprite("runRight");
+        player.velocity.x = 5; 
+        player.lastDirection = "right";
+      }
+      else if (keys.a.pressed) {
+        player.switchSprite("runLeft");
+        player.velocity.x = -5;
+        player.lastDirection = "left";
+      } else if(player.lastDirection === "left"){
+        player.switchSprite("idleLeft");
+      } else {
+        player.switchSprite("idleRight");
+
+      }
       
-      player.draw();
+      player.draw(currentCtx);
       player.update()
       // ctx?.clearRect(0, 0, canvasRef?.width ?? 0, canvasRef?.height ?? 0);
     }
