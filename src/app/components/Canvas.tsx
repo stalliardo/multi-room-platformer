@@ -28,7 +28,7 @@ const Canvas = () => {
     if (!ctx) return;
 
     const cr = canvasRef.current;
-    
+
     // set the canvas width
     cr.width = 1024;
     cr.height = 576;
@@ -95,7 +95,7 @@ const Canvas = () => {
       }
     });
 
-    let level = 3;
+    let level = 1;
     let levels: Levels = {
       1: {
         init: () => {
@@ -243,7 +243,7 @@ const Canvas = () => {
 
   }, [canvasRef]);
 
-  return <div>
+  return <div style={{margin: "auto"}}>
     <canvas ref={canvasRef}></canvas>
   </div>
 };
