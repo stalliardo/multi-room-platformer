@@ -1,6 +1,21 @@
 import CollisionBlock from "./CollisionBlock";
 import Sprite from "./Sprite";
 
+type Animations = {
+    [index: string]: AnimationItem;
+    idleRight: AnimationItem;
+    idleLeft: AnimationItem;
+    runRight: AnimationItem;
+    runLeft: AnimationItem;
+}
+type AnimationItem = {
+    frameRate: number;
+    frameBuffer: number;
+    loop: boolean;
+    imageSrc: string;
+    image?: any
+}
+
 interface PlayerArgs {
     collisionBlocks: CollisionBlock[];
     position: {
@@ -10,7 +25,8 @@ interface PlayerArgs {
     imageSrc: string;
     canvas: HTMLCanvasElement;
     frameRate: number;
-    ctx: CanvasRenderingContext2D
+    ctx: CanvasRenderingContext2D;
+    animations: Animations
 }
 
 export default class Player extends Sprite {
@@ -26,11 +42,14 @@ export default class Player extends Sprite {
     gravity: number = 1;
     collisionBlocks;
     ctx;
+    animations;
+    lastDirection: string = "right";
 
-    constructor({ collisionBlocks, position, imageSrc, canvas, frameRate, ctx }: PlayerArgs) {
-        super({position, imageSrc, frameRate})
+    constructor({ collisionBlocks, position, imageSrc, canvas, frameRate, ctx, animations }: PlayerArgs) {
+        super({position, imageSrc, frameRate, animations})
         this.collisionBlocks = collisionBlocks;
         this.ctx = ctx;
+        this.animations = animations;
     }
 
     checkForHorizontalCollisions() {
@@ -108,5 +127,13 @@ export default class Player extends Sprite {
         // this.ctx.fillStyle = "rgba(0,0,255, 0.5)"
         // this.ctx.fillRect(this.hitBox.position.x, this.hitBox.position.y, this.hitBox.width, this.hitBox.height);
         this.checkForVerticalCollisions();
+    }
+
+    switchSprite(name: string){
+        if(this.image === this.animations[name].image) return;
+        this.currentFrame = 0;
+        this.image = this.animations[name].image;
+        this.frameRate = this.animations[name].frameRate;
+        this.frameBuffer = this.animations[name].frameBuffer;
     }
 }

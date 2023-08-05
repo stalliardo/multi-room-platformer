@@ -36,7 +36,40 @@ const Canvas = () => {
 
     const collisionBlocks = getCollisionBlocksArray("level1"); 
     
-    const player = new Player({collisionBlocks, position: {x: 200, y: 200}, imageSrc: "king/idle.png", canvas: cr, frameRate: 11, ctx});
+    const player = new Player({
+      collisionBlocks, 
+      position: {x: 200, y: 200}, 
+      imageSrc: "king/idle.png", 
+      canvas: cr, 
+      frameRate: 11, 
+      ctx,
+      animations: {
+        idleRight: {
+          frameRate: 11,
+          frameBuffer: 2,
+          loop: true,
+          imageSrc: "king/idle.png",
+      },
+      idleLeft: {
+          frameRate: 11,
+          frameBuffer: 2,
+          loop: true,
+          imageSrc: "king/idleLeft.png"
+      },
+      runRight: {
+          frameRate: 8,
+          frameBuffer: 4,
+          loop: true,
+          imageSrc: "king/runRight.png"
+      },
+      runLeft: {
+          frameRate: 8,
+          frameBuffer: 4,
+          loop: true,
+          imageSrc: "king/runLeft.png"
+      }
+      }
+    });
     const backgroundLevel1 = new Sprite({position: {x: 0, y: 0}, imageSrc: "backgroundLevel1.png"});
 
     // set the collsionBlocks by calling the function
@@ -54,8 +87,21 @@ const Canvas = () => {
 
       player.velocity.x = 0;
 
-      if (keys.d.pressed) player.velocity.x = 5; 
-      else if (keys.a.pressed) player.velocity.x = -5;
+      if (keys.d.pressed) {
+        player.switchSprite("runRight");
+        player.velocity.x = 5; 
+        player.lastDirection = "right";
+      }
+      else if (keys.a.pressed) {
+        player.switchSprite("runLeft");
+        player.velocity.x = -5;
+        player.lastDirection = "left";
+      } else if(player.lastDirection === "left"){
+        player.switchSprite("idleLeft");
+      } else {
+        player.switchSprite("idleRight");
+
+      }
       
       player.draw(currentCtx);
       player.update()

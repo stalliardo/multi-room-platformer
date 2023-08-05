@@ -1,3 +1,18 @@
+type Animations = {
+    [index: string]: AnimationItem;
+    idleRight: AnimationItem;
+    idleLeft: AnimationItem;
+    runRight: AnimationItem;
+    runLeft: AnimationItem;
+}
+type AnimationItem = {
+    frameRate: number;
+    frameBuffer: number;
+    loop: boolean;
+    imageSrc: string;
+    image?: any
+}
+
 interface SpriteArgs {
     position: {
         x: number;
@@ -5,6 +20,7 @@ interface SpriteArgs {
     },
     imageSrc: string;
     frameRate?: number;
+    animations?: Animations 
 }
 
 export default class Sprite {
@@ -18,8 +34,9 @@ export default class Sprite {
     currentFrame;
     elapsedFrames;
     frameBuffer;
+    animations;
 
-    constructor({ position, imageSrc, frameRate = 1 }: SpriteArgs) {
+    constructor({ position, imageSrc, frameRate = 1, animations }: SpriteArgs) {
         this.position = position;
         this.imageSrc = imageSrc;
         this.image.src = this.imageSrc;
@@ -32,6 +49,15 @@ export default class Sprite {
         this.currentFrame = 0;
         this.elapsedFrames = 0;
         this.frameBuffer = 4;
+        this.animations = animations;
+
+        if(this.animations){
+            for(let key in this.animations){
+                const image = new Image();
+                image.src = this.animations[key].imageSrc;
+                this.animations[key].image = image;
+            }
+        }
     }
 
     draw(ctx: CanvasRenderingContext2D) {
