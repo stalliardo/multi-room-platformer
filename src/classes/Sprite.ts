@@ -4,6 +4,7 @@ type Animations = {
     idleLeft: AnimationItem;
     runRight: AnimationItem;
     runLeft: AnimationItem;
+    enterDoor: AnimationItem;
 }
 type AnimationItem = {
     frameRate: number;
@@ -20,7 +21,10 @@ interface SpriteArgs {
     },
     imageSrc: string;
     frameRate?: number;
-    animations?: Animations 
+    frameBuffer?: number;
+    animations?: Animations
+    loop?: boolean;
+    autoplay?: boolean;
 }
 
 export default class Sprite {
@@ -35,8 +39,10 @@ export default class Sprite {
     elapsedFrames;
     frameBuffer;
     animations;
+    loop;
+    autoplay;
 
-    constructor({ position, imageSrc, frameRate = 1, animations }: SpriteArgs) {
+    constructor({ position, imageSrc, frameRate = 1, frameBuffer = 4, animations, loop = true, autoplay = true }: SpriteArgs) {
         this.position = position;
         this.imageSrc = imageSrc;
         this.image.src = this.imageSrc;
@@ -48,8 +54,10 @@ export default class Sprite {
         }
         this.currentFrame = 0;
         this.elapsedFrames = 0;
-        this.frameBuffer = 4;
+        this.frameBuffer = frameBuffer;
         this.animations = animations;
+        this.loop = loop;
+        this.autoplay = autoplay;
 
         if(this.animations){
             for(let key in this.animations){
@@ -85,12 +93,17 @@ export default class Sprite {
         this.updateFrames();
     }
 
+    play(){
+        this.autoplay = true;
+    }
+
     updateFrames(){
+        if(!this.autoplay) return;
         this.elapsedFrames++;
         if(this.elapsedFrames % this.frameBuffer === 0){
             if(this.currentFrame < this.frameRate - 1){
                 this.currentFrame++;
-            } else {
+            } else if (this.loop) {
                 this.currentFrame = 0;
             }
         }

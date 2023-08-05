@@ -7,6 +7,7 @@ type Animations = {
     idleLeft: AnimationItem;
     runRight: AnimationItem;
     runLeft: AnimationItem;
+    enterDoor: AnimationItem;
 }
 type AnimationItem = {
     frameRate: number;
@@ -27,6 +28,7 @@ interface PlayerArgs {
     frameRate: number;
     ctx: CanvasRenderingContext2D;
     animations: Animations
+    loop?: boolean;
 }
 
 export default class Player extends Sprite {
@@ -44,12 +46,14 @@ export default class Player extends Sprite {
     ctx;
     animations;
     lastDirection: string = "right";
+    preventInput: boolean = false;
 
-    constructor({ collisionBlocks, position, imageSrc, canvas, frameRate, ctx, animations }: PlayerArgs) {
-        super({position, imageSrc, frameRate, animations})
+    constructor({ collisionBlocks, position, imageSrc, canvas, frameRate, ctx, animations, loop = true }: PlayerArgs) { // <- is loop required here? TODO
+        super({position, imageSrc, frameRate, animations, loop})
         this.collisionBlocks = collisionBlocks;
         this.ctx = ctx;
         this.animations = animations;
+        this.loop = loop;
     }
 
     checkForHorizontalCollisions() {
@@ -129,11 +133,34 @@ export default class Player extends Sprite {
         this.checkForVerticalCollisions();
     }
 
+    handleInput(keys: any){
+        if(this.preventInput) return;
+        this.velocity.x = 0;
+
+      if (keys.d.pressed) {
+        this.switchSprite("runRight");
+        this.velocity.x = 5;
+        this.lastDirection = "right";
+      }
+      else if (keys.a.pressed) {
+        this.switchSprite("runLeft");
+        this.velocity.x = -5;
+        this.lastDirection = "left";
+      } else if (this.lastDirection === "left") {
+        this.switchSprite("idleLeft");
+      } else {
+        this.switchSprite("idleRight");
+
+      }
+
+    }
+
     switchSprite(name: string){
         if(this.image === this.animations[name].image) return;
         this.currentFrame = 0;
         this.image = this.animations[name].image;
         this.frameRate = this.animations[name].frameRate;
         this.frameBuffer = this.animations[name].frameBuffer;
+        this.loop = this.animations[name].loop;
     }
 }

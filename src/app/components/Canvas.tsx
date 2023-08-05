@@ -34,14 +34,14 @@ const Canvas = () => {
     ctx.fillStyle = 'red';
     ctx.fillRect(100, 100, 100, 100);
 
-    const collisionBlocks = getCollisionBlocksArray("level1"); 
-    
+    const collisionBlocks = getCollisionBlocksArray("level1");
+
     const player = new Player({
-      collisionBlocks, 
-      position: {x: 200, y: 200}, 
-      imageSrc: "king/idle.png", 
-      canvas: cr, 
-      frameRate: 11, 
+      collisionBlocks,
+      position: { x: 200, y: 200 },
+      imageSrc: "king/idle.png",
+      canvas: cr,
+      frameRate: 11,
       ctx,
       animations: {
         idleRight: {
@@ -49,28 +49,49 @@ const Canvas = () => {
           frameBuffer: 2,
           loop: true,
           imageSrc: "king/idle.png",
-      },
-      idleLeft: {
+        },
+        idleLeft: {
           frameRate: 11,
           frameBuffer: 2,
           loop: true,
           imageSrc: "king/idleLeft.png"
-      },
-      runRight: {
+        },
+        runRight: {
           frameRate: 8,
           frameBuffer: 4,
           loop: true,
           imageSrc: "king/runRight.png"
-      },
-      runLeft: {
+        },
+        runLeft: {
           frameRate: 8,
           frameBuffer: 4,
           loop: true,
           imageSrc: "king/runLeft.png"
-      }
+        },
+        enterDoor: {
+          frameRate: 8,
+          frameBuffer: 4,
+          loop: false,
+          imageSrc: "king/enterDoor.png"
+        }
       }
     });
-    const backgroundLevel1 = new Sprite({position: {x: 0, y: 0}, imageSrc: "backgroundLevel1.png"});
+
+
+    const doors = [
+      new Sprite({
+        position: { x: 788, y: 269 },
+        imageSrc: "doorOpen.png",
+        frameRate: 5,
+        frameBuffer: 6,
+        loop: false,
+        autoplay: false
+      })
+    ]
+
+
+
+    const backgroundLevel1 = new Sprite({ position: { x: 0, y: 0 }, imageSrc: "backgroundLevel1.png" });
 
     // set the collsionBlocks by calling the function
 
@@ -85,24 +106,12 @@ const Canvas = () => {
         collisionBlock.draw(currentCtx);
       });
 
-      player.velocity.x = 0;
+      doors.forEach((door) => {
+        door.draw(currentCtx);
+      });
 
-      if (keys.d.pressed) {
-        player.switchSprite("runRight");
-        player.velocity.x = 5; 
-        player.lastDirection = "right";
-      }
-      else if (keys.a.pressed) {
-        player.switchSprite("runLeft");
-        player.velocity.x = -5;
-        player.lastDirection = "left";
-      } else if(player.lastDirection === "left"){
-        player.switchSprite("idleLeft");
-      } else {
-        player.switchSprite("idleRight");
-
-      }
       
+      player.handleInput(keys);
       player.draw(currentCtx);
       player.update()
       // ctx?.clearRect(0, 0, canvasRef?.width ?? 0, canvasRef?.height ?? 0);
@@ -111,8 +120,24 @@ const Canvas = () => {
     animate();
 
     addEventListener("keydown", (event) => {
+      if(player.preventInput) return;
       switch (event.key) {
         case "w":
+          for (let i = 0; i < doors.length; i++) {
+            const door = doors[i];
+            if(player.position.x + player.hitBox.width <= door.position.x + door.width &&
+            player.position.x + player.hitBox.width >= door.position.x &&
+            player.hitBox.position.y + player.hitBox.height >= door.position.y &&
+            player.hitBox.position.y <= door.position.y + door.height)
+            {
+              player.velocity.x = 0;
+              player.velocity.y = 0;
+              player.preventInput = true;
+              player.switchSprite("enterDoor");
+              door.play();
+              return;
+            }
+          } 
           if (player.velocity.y === 0) player.velocity.y -= 20;
           break;
         case "a":
