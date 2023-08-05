@@ -36,7 +36,7 @@ const Canvas = () => {
 
     const collisionBlocks = getCollisionBlocksArray("level1"); 
     
-    const player = new Player({collisionBlocks, position: {x: 200, y: 200}, imageSrc: "king/idle.png", canvas: cr, frameRate: 11});
+    const player = new Player({collisionBlocks, position: {x: 200, y: 200}, imageSrc: "king/idle.png", canvas: cr, frameRate: 11, ctx});
     const backgroundLevel1 = new Sprite({position: {x: 0, y: 0}, imageSrc: "backgroundLevel1.png"});
 
     // set the collsionBlocks by calling the function
